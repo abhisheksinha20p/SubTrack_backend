@@ -8,6 +8,7 @@ import { rateLimiter } from './middleware/rateLimiter';
 import { authMiddleware } from './middleware/auth';
 import { setupProxies } from './proxy';
 import { healthRouter } from './routes/health';
+import { statsRouter } from './routes/stats';
 import { logger } from './utils/logger';
 
 const app = express();
@@ -35,6 +36,9 @@ app.use('/health', healthRouter);
 
 // Auth middleware for protected routes
 app.use('/api/v1', authMiddleware);
+
+// Dashboard stats routes (handled by gateway, not proxied)
+app.use('/api/v1/dashboard', statsRouter);
 
 // Setup proxies to microservices
 setupProxies(app);
