@@ -1,0 +1,25 @@
+{
+  "name": "subtrack",
+  "version": "1.0.0",
+  "description": "Subscription & Billing Management SaaS",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "frontend",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "docker-compose up -d",
+    "dev:logs": "docker-compose logs -f",
+    "dev:down": "docker-compose down",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces",
+    "clean": "npm run clean --workspaces"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "SubTrack Team",
+  "license": "MIT"
+}
