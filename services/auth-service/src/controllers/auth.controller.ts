@@ -47,12 +47,46 @@ export const authController = {
 
             logger.info(`User registered: ${user.email}`);
 
+            // Generate tokens for auto-login
+            const accessToken = jwt.sign(
+                { id: user._id, email: user.email, roles: user.roles },
+                config.jwtSecret,
+                { expiresIn: config.jwtAccessExpiry }
+            );
+
+            const refreshToken = uuidv4();
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+
+            // Save refresh token
+            await RefreshToken.create({
+                userId: user._id,
+                tokenHash: crypto.createHash('sha256').update(refreshToken).digest('hex'),
+                expiresAt,
+                deviceInfo: {
+                    userAgent: req.headers['user-agent'],
+                    ip: req.ip,
+                },
+            });
+
+            // Update last login
+            user.lastLoginAt = new Date();
+            await user.save();
+
             res.status(201).json({
                 success: true,
-                message: 'Registration successful. Please verify your email.',
+                message: 'Registration successful.',
                 data: {
-                    userId: user._id,
-                    email: user.email,
+                    accessToken,
+                    refreshToken,
+                    expiresIn: 900,
+                    user: {
+                        id: user._id,
+                        email: user.email,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        roles: user.roles,
+                    },
                 },
             });
         } catch (error) {

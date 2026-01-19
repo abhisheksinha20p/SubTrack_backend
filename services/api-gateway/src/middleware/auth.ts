@@ -11,6 +11,7 @@ const publicRoutes = [
     '/auth/forgot-password',
     '/auth/reset-password',
     '/auth/verify-email',
+    '/billing/plans',
 ];
 
 export interface AuthRequest extends Request {

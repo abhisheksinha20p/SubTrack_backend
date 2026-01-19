@@ -22,6 +22,10 @@ export interface IPlan extends Document {
         yearly: number;
         currency: string;
     };
+    stripePriceId?: {
+        monthly?: string;
+        yearly?: string;
+    };
     features: IPlanFeature[];
     limits: IPlanLimits;
     isActive: boolean;
@@ -50,6 +54,10 @@ const planSchema = new Schema<IPlan>(
             monthly: { type: Number, required: true, default: 0 },
             yearly: { type: Number, required: true, default: 0 },
             currency: { type: String, default: 'USD' },
+        },
+        stripePriceId: {
+            monthly: String,
+            yearly: String,
         },
         features: [{
             name: { type: String, required: true },
