@@ -1,4 +1,5 @@
 import { Kafka, Producer, Consumer } from 'kafkajs';
+import mongoose from 'mongoose';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
@@ -65,6 +66,21 @@ const handleEvent = async (event: any) => {
                 },
             });
             logger.info(`Created settings for user: ${event.data.userId}`);
+            break;
+
+        case 'user.updated':
+            // Update member details in all organizations
+            await mongoose.model('Member').updateMany(
+                { userId: event.data.userId },
+                {
+                    $set: {
+                        email: event.data.email,
+                        firstName: event.data.firstName,
+                        lastName: event.data.lastName,
+                    }
+                }
+            );
+            logger.info(`Updated member details for user: ${event.data.userId}`);
             break;
 
         default:

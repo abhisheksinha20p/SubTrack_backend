@@ -445,10 +445,10 @@ export const subscriptionController = {
                         end: new Date(),
                     },
                     usage: {
-                        users: { used: 5, limit: 10 },
-                        projects: { used: 3, limit: 10 },
-                        storage: { used: 256, limit: 1024, unit: 'MB' },
-                        apiCalls: { used: 5000, limit: 10000 },
+                        users: { used: 1, limit: 10 },
+                        projects: { used: 1, limit: 10 },
+                        storage: { used: 80, limit: 1024, unit: 'MB' }, // 80MB
+                        apiCalls: { used: 100, limit: 10000 },
                     },
                 },
             });

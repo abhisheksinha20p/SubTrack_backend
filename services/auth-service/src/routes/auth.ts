@@ -23,3 +23,9 @@ authRouter.post('/reset-password', validate(resetPasswordSchema), authController
 
 // Email verification
 authRouter.get('/verify-email', authController.verifyEmail);
+
+// Profile
+// TODO: Add auth middleware when available in this service, or ensure gateway handles it.
+// Assuming req.user is populated by global middleware or we add one here.
+import { authenticate } from '../middleware/auth';
+authRouter.patch('/profile', authenticate, authController.updateProfile);
