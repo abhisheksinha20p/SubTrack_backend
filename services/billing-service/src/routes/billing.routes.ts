@@ -11,6 +11,7 @@ billingRouter.get('/plans/:id', planController.getById);
 
 // Subscriptions
 billingRouter.get('/subscriptions', subscriptionController.get);
+billingRouter.post('/subscriptions/sync', subscriptionController.sync);
 billingRouter.post('/subscriptions', subscriptionController.create);
 billingRouter.post('/subscriptions/change', subscriptionController.changePlan);
 billingRouter.post('/subscriptions/cancel', subscriptionController.cancel);

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import slugify from 'slugify';
-import { Organization } from '../models';
+import { Organization, Member } from '../models';
 import { publishEvent } from '../kafka';
 import { logger } from '../utils/logger';
 
@@ -10,10 +10,23 @@ export const organizationController = {
         try {
             const userId = req.headers['x-user-id'] as string;
 
-            // Find orgs where user is owner or member
-            const organizations = await Organization.find({ ownerId: userId })
+            // Find all memberships for this user
+            const memberships = await Member.find({ userId })
+                .populate('organizationId')
                 .sort({ createdAt: -1 })
                 .lean();
+
+            // Map to organization details with role
+            const organizations = memberships.map((m: any) => {
+                const org = m.organizationId;
+                if (!org) return null;
+                // Merge org details with the user's role in that org
+                return {
+                    ...org,
+                    role: m.role, // Attach role here
+                    joinedAt: m.createdAt
+                };
+            }).filter(Boolean);
 
             res.json({
                 success: true,
@@ -50,6 +63,15 @@ export const organizationController = {
                 billingEmail: billingEmail || undefined,
                 industry,
                 size,
+            });
+
+            // Add owner as a member
+            await Member.create({
+                userId,
+                organizationId: organization._id,
+                email: req.headers['x-user-email'] || 'unknown@example.com', // Best effort if not passed
+                role: 'owner',
+                status: 'active',
             });
 
             // Publish event

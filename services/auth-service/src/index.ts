@@ -30,8 +30,8 @@ const start = async () => {
         logger.info('Connected to MongoDB');
 
         // Connect to Kafka
-        await connectKafka();
-        logger.info('Connected to Kafka');
+        // await connectKafka();
+        // logger.info('Connected to Kafka');
 
         // Start server
         app.listen(config.port, () => {

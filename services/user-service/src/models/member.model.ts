@@ -27,6 +27,7 @@ const memberSchema = new Schema<IMember>(
         },
         organizationId: {
             type: Schema.Types.ObjectId,
+            ref: 'Organization',
             required: true,
             index: true,
         },
