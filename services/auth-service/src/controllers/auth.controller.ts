@@ -51,7 +51,7 @@ export const authController = {
             const accessToken = jwt.sign(
                 { id: user._id, email: user.email, roles: user.roles },
                 config.jwtSecret,
-                { expiresIn: config.jwtAccessExpiry }
+                { expiresIn: config.jwtAccessExpiry } as jwt.SignOptions
             );
 
             const refreshToken = uuidv4();
@@ -125,7 +125,7 @@ export const authController = {
             const accessToken = jwt.sign(
                 { id: user._id, email: user.email, roles: user.roles },
                 config.jwtSecret,
-                { expiresIn: config.jwtAccessExpiry }
+                { expiresIn: config.jwtAccessExpiry } as jwt.SignOptions
             );
 
             const refreshToken = uuidv4();
@@ -210,7 +210,7 @@ export const authController = {
             const accessToken = jwt.sign(
                 { id: user._id, email: user.email, roles: user.roles },
                 config.jwtSecret,
-                { expiresIn: config.jwtAccessExpiry }
+                { expiresIn: config.jwtAccessExpiry } as jwt.SignOptions
             );
 
             res.json({
@@ -324,6 +324,77 @@ export const authController = {
             res.status(500).json({
                 success: false,
                 error: { code: 'INTERNAL_ERROR', message: 'Verification failed' },
+            });
+        }
+    },
+
+    // Update Profile
+    async updateProfile(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user?.id;
+            const { firstName, lastName, email } = req.body;
+
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    error: { code: 'UNAUTHORIZED', message: 'User not authenticated' },
+                });
+            }
+
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    error: { code: 'NOT_FOUND', message: 'User not found' },
+                });
+            }
+
+            // Check email uniqueness if changed
+            if (email && email !== user.email) {
+                const existing = await User.findOne({ email });
+                if (existing) {
+                    return res.status(409).json({
+                        success: false,
+                        error: { code: 'CONFLICT', message: 'Email already in use' },
+                    });
+                }
+                user.email = email;
+                user.emailVerified = false; // Reset verification
+                // TODO: Send verification email
+            }
+
+            if (firstName) user.firstName = firstName;
+            if (lastName) user.lastName = lastName;
+
+            await user.save();
+
+            // Publish event for other services (user-service) to update
+            await publishEvent('user.events', 'user.updated', {
+                userId: user._id.toString(),
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+            });
+
+            res.json({
+                success: true,
+                message: 'Profile updated successfully',
+                data: {
+                    user: {
+                        id: user._id,
+                        email: user.email,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        roles: user.roles,
+                    },
+                },
+            });
+
+        } catch (error) {
+            logger.error('Update profile error:', error);
+            res.status(500).json({
+                success: false,
+                error: { code: 'INTERNAL_ERROR', message: 'Failed to update profile' },
             });
         }
     },
